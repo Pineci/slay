@@ -28,10 +28,16 @@ class Grid(ABC):
         self.top_left = top_left
         self.scale = scale
 
-        @property
-        @abstractmethod
-        def grid(self):
-            ...
+    @property
+    @abstractmethod
+    def grid(self):
+        pass
+
+    def get(self, coord: Tuple[int, int]) -> Tuple[int, int]:
+        if coord[0] < 0 or coord[0] >= self.rows or coord[1] < 0 or coord[1] >= self.cols:
+            raise ValueError(f"Tried to access invalid coordinates: {coord}")
+        else:
+            return self.grid[coord[0]][coord[1]]
 
 class HexGrid(Grid):
     '''
@@ -39,11 +45,10 @@ class HexGrid(Grid):
     forming equilateral triangles between neighboring points.
     '''
 
+    grid = None
+
     def __init__(self, rows, cols, top_left, scale):
-        self.rows = rows
-        self.cols = cols
-        self.top_left = top_left
-        self.scale = scale
+        super().__init__(rows=rows, cols=cols, top_left=top_left, scale=scale)
 
         self.grid = self.make_hex_grid(top_left=self.top_left, side_length=self.scale)
     
