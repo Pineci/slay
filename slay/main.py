@@ -16,7 +16,7 @@ def test_grid():
     top_left = (w * 0.1, h * 0.1)
     side_length = 10
 
-    hex_rows, hex_cols = 40, 20
+    hex_rows, hex_cols = 41, 20
     rows, cols = hex_rows+2, 3*hex_cols + 2
 
     pygame.init()
@@ -50,7 +50,7 @@ def test_grid():
                         color = (255, min(60*hexObject.priority, 255), 0)
                     else:
                         color = (0, min(60*hexObject.priority, 255), 255)
-                    hexagon, center = hexObject.get_hexagon(hex_grid)
+                    hexagon, center = hexObject.get_shape(hex_grid)
                     pygame.draw.polygon(root, color, hexagon, 0)
                     pygame.draw.polygon(root, edge_color, hexagon, 2)
                     #pygame.draw.circle(root, fg_color, center, radius, 0)

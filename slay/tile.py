@@ -36,6 +36,17 @@ class Tile(ABC):
     def set_activity(self, active: bool=True) -> None:
         self.active = active
 
+    def set_team(self, team: int=-1) -> None:
+        if self.is_active():
+            self.team = team
+        else:
+            self.team = -1
+    def get_team(self) -> int:
+        return self.team
+
+    def get_shape(self, grid):
+        return self.get_shape_from_grid(grid, self.get_grid_coords(), use_grid=True)
+
     def is_neighbor(self, tile: 'Tile') -> bool:
         return tile.get_tile_coords() in self.get_neighbors_coords()
 
@@ -86,5 +97,4 @@ class Hexagon(Tile):
             relative_coords = [(-2, 0), (-1, 1), (1, 1), (2, 0), (1, 0), (-1, 0)]
         return list(map(lambda c: (c[0] + self.tile_coords[0], c[1] + self.tile_coords[1]), relative_coords))
     
-    def get_hexagon(self, hex_grid):
-        return self.get_shape_from_grid(hex_grid, self.get_grid_coords(), use_grid=True)
+   

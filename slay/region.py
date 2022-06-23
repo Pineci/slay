@@ -1,51 +1,61 @@
 from tile import Tile
-from typing import List
+from typing import List, Tuple
 from pieces import Piece
+from map import Map
 from queue import PriorityQueue
 
 class Region:
     '''
-    A region is a contiguous part of the playboard, i.e. connected tiles all of the same type
+    A region is a contiguous part of the playboard, i.e. connected tiles all of the same type.
+    Essentially, it is a subset of the map with additionl information to keep track of the game pieces and rules
     '''
 
-    def __init__(self, balance: int=0, tiles: List[Tile] = [], pieces: List[Piece] = []):
-        self.balance = balance
-        self.tiles = tiles
-        self.pieces = pieces
+    # TODO: Change this class so that the tiles of a region are just represented by their coordinates,
+    #       access actual hexagons through a map class
+    def __init__(self, map: Map=None, tile_coords: List[Tuple[int, int]] = [], initialize: bool=True):
+        self.map = map
+        self.tile_coords = tile_coords
+        self.pieces = []
+        
+        if initialize:
+            self.initialize_region()
 
-        self.coord_to_tile_map = {tile.get_tile_coords(): tile for tile in self.tiles}
+    def add_tile(self, tile_coord: Tuple[int, int]) -> None:
+        if not self.contains_tile(tile_coord):
+            self.tile_coords.append(tile_coord)
 
-    def add_tile(self, tile: 'Tile'):
-        if tile not in self.tiles:
-            self.tiles.append(tile)
-            self.coord_to_tile_map[tile.get_tile_coords()] = tile
+    def remove_tile(self, tile_coord: Tuple[int, int]) -> None:
+        if self.contains_tile(tile_coord):
+            self.tile_coords.remove(tile_coord)
 
-    def remove_tile(self, tile: 'Tile'):
-        if tile in self.tiles:
-            self.tiles.remove(tile)
-            del self.coord_to_tile_map[tile.get_tile_coords()]
+    def contains_tile(self, tile_coord: Tuple[int, int]) -> bool:
+        return tile_coord in self.tile_coords
+
+    # TODO: Need to implement this, i.e. set balances etc.
+    def initialize_region(self):
+        pass
 
     # TODO: Implement this function properly so it maintains invariances
     def merge_regions(self, other: 'Region'):
-        ...
+        pass
 
     def check_valid_region(self) -> bool:
         return self.check_tile_same_team() and self.check_tile_connectivity() and self.check_piece_containment()
 
     def check_tile_connectivity(self) -> bool:
         if len(self.tiles > 1):
-            tile_coords = list(map(lambda tile: tile.get_tile_coords(), self.tiles))
-            reached = {coord: False for coord in tile_coords}
+            reached = {coord: False for coord in self.tile_coords}
             queue = PriorityQueue()
-            queue.put((0, self.tiles[0]))
+            queue.put((0, self.tile_coords[0]))
             while queue.not_empty():
-                priority, tile = queue.get()
+                priority, tile_coord = queue.get()
+                tile = self.map.get_tile(tile_coord)
                 neighbor_coords = tile.get_neighbors_coords()
                 for coord in neighbor_coords:
-                    if coord in tile_coords:
+                    if coord in self.tile_coords:
                         reached[coord] = True
-                        queue.put((priority+1, self.coord_to_tile_map[coord]))
-            for coord in tile_coords:
+                        queue.put((priority+1, coord))
+            for coord in self.tile_coords:
                 if not reached[coord]:
                     return False
         return True

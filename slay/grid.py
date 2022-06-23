@@ -21,8 +21,8 @@ class Grid(ABC):
 
     def __init__(self, rows: int = 1, 
                        cols: int = 1, 
-                       top_left: Tuple[float, float]=(0, 0), 
-                       scale: float = 1):
+                       top_left: Tuple[float, float]=(0, 0),
+                       scale: float = None):
         self.rows = rows
         self.cols = cols
         self.top_left = top_left
@@ -47,7 +47,10 @@ class HexGrid(Grid):
 
     grid = None
 
-    def __init__(self, rows, cols, top_left, scale):
+    def __init__(self, rows: int = 1, 
+                       cols: int = 1, 
+                       top_left: Tuple[float, float]=(0, 0),
+                       scale: float = None):
         super().__init__(rows=rows, cols=cols, top_left=top_left, scale=scale)
 
         self.grid = self.make_hex_grid(top_left=self.top_left, side_length=self.scale)
@@ -65,3 +68,27 @@ class HexGrid(Grid):
             return i*sin(5*pi/3)*side_length
         return [self.make_horizontal_line((top_left[0]+dx(i), top_left[1]-dy(i)), side_length)
             for i in range(self.rows)]
+
+    @classmethod
+    def scale_from_size(cls, top_left: Tuple[float, float], 
+                              rows: int = 1,
+                              cols: int = 1,
+                              width: float = None,
+                              height: float = None) -> float:
+        if not width and not height:
+            raise ValueError("At least one of width, height must not be None!")
+        if width:
+            # Prioritize using width
+            # formula is (cols - 0.5) * scale == width (here 0.5 is just cos(5*pi/3))
+            return width / (cols - 0.5)
+        else:
+            # Otherwise use height
+            # formula is (rows - 1) * sin(5*pi/3)*scale == height
+            return height / ((rows - 1) * sin(5*pi/3))
+
+    def bottom_right_from_scale(cls, top_left: Tuple[float, float],
+                                     rows: int = 1,
+                                     cols: int = 1,
+                                     scale: float = 1) -> Tuple[float, float]:
+        return (top_left[0]+((cols-0.5)*scale if rows > 1 else 0), 
+                top_left[1]-(rows-1)*sin(5*pi/3)*scale)
