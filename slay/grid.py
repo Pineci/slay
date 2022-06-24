@@ -26,7 +26,7 @@ class Grid(ABC):
         self.rows = rows
         self.cols = cols
         self.top_left = top_left
-        self.scale = scale
+        self.scale = scale # Scale should be the same as the length of the side of the tiled polygon
 
     @property
     @abstractmethod

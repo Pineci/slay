@@ -1,5 +1,6 @@
 from abc import ABC, abstractclassmethod
 from tile import Tile
+from typing import Tuple
 
 class Piece(ABC):
     '''
@@ -8,8 +9,8 @@ class Piece(ABC):
     to overtake neighboring tiles.
     '''
 
-    def __init__(self, tile: 'Tile'=None):
-        self.tile = tile
+    def __init__(self, tile_coord : Tuple[int, int]=None):
+        self.tile_coord = tile_coord
 
     @property
     @abstractclassmethod
@@ -46,7 +47,7 @@ class Piece(ABC):
 
 class Hut(Piece):
     power = 1
-    name = "Hut"
+    name = "hut"
     moveable = False
     turn_cost = 0
     initial_cost = 0
@@ -54,23 +55,23 @@ class Hut(Piece):
 
 class Fort(Piece):
     power = 2
-    name = "Fort"
+    name = "fort"
     moveable = False
     turn_cost = 0
     initial_cost = 15
     purchasable = True
 
-class SoldierOne(Piece):
+class Soldier1(Piece):
     power = 1
-    name = "Soldier"
+    name = "soldier1"
     moveable = True
     turn_cost = 2
     initial_cost = 10
     purchasable = True
 
-class SoldierTwo(Piece):
+class Soldier2(Piece):
     power = 2
-    name = "Spearman"
+    name = "soldier2"
     moveable = True
     turn_cost = 6
     initial_cost = 20

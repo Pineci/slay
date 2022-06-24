@@ -1,8 +1,13 @@
 from tile import Tile
 from typing import List, Tuple
-from pieces import Piece
+from piece import *
 from map import Map
 from queue import PriorityQueue
+import numpy as np
+
+class RegionConfig:
+
+    tile_starting_balance = 5
 
 class Region:
     '''
@@ -10,15 +15,17 @@ class Region:
     Essentially, it is a subset of the map with additionl information to keep track of the game pieces and rules
     '''
 
-    # TODO: Change this class so that the tiles of a region are just represented by their coordinates,
-    #       access actual hexagons through a map class
-    def __init__(self, map: Map=None, tile_coords: List[Tuple[int, int]] = [], initialize: bool=True):
+    def __init__(self, map: Map=None, tile_coords: List[Tuple[int, int]] = [], initialize: bool=True, id: int=0):
         self.map = map
         self.tile_coords = tile_coords
         self.pieces = []
+        self.id = id
         
         if initialize:
             self.initialize_region()
+
+    def __eq__(self, other: 'Region') -> bool:
+        return self.id == other.id
 
     def add_tile(self, tile_coord: Tuple[int, int]) -> None:
         if not self.contains_tile(tile_coord):
@@ -33,7 +40,11 @@ class Region:
 
     # TODO: Need to implement this, i.e. set balances etc.
     def initialize_region(self):
-        pass
+        if len(self.tile_coords) > 1:
+            hut_coord = self.tile_coords[np.random.choice(range(len(self.tile_coords)))]
+            self.pieces.append(Hut(hut_coord))
+
+        self.balance = len(self.tile_coords) * RegionConfig.tile_starting_balance
 
     # TODO: Implement this function properly so it maintains invariances
     def merge_regions(self, other: 'Region'):

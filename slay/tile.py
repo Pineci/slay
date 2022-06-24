@@ -41,6 +41,7 @@ class Tile(ABC):
             self.team = team
         else:
             self.team = -1
+            
     def get_team(self) -> int:
         return self.team
 

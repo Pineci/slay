@@ -1,7 +1,7 @@
 from typing import Tuple, List
 from tile import Tile, TileType
 import numpy as np
-from queue import PriorityQueue
+from queue import PriorityQueue, Queue
 
 class Map:
     '''
@@ -9,7 +9,6 @@ class Map:
     handles loading and saving of a map, map generation, etc.
     '''
 
-    # TODO: Implement this class
     def __init__(self, path: str = "", 
                        land_points: int = 1, 
                        sea_points: int = 0, 
@@ -58,11 +57,9 @@ class Map:
             i,j = point
             q.put((0, counter, self.map_tiles[i][j]))
             counter += 1
-            # TODO: remove this line
-            self.map_tiles[i][j].priority = 0
             reached[i][j] = True
             
-        
+        # Now expand each tile and set them to the activity of their parent
         while not q.empty():
             priority, order, tile = q.get()
             neighbor_coords = tile.get_neighbors_coords()
@@ -72,10 +69,33 @@ class Map:
                 if self.in_range(coord) and not reached[i][j]:
                     reached[i][j] = True
                     self.map_tiles[i][j].set_activity(tile.is_active())
-                    # TODO: remove this line
-                    self.map_tiles[i][j].priority = priority+1
                     q.put((priority+1, counter, self.map_tiles[i][j]))
                     counter += 1
+
+        # Check for connectivity of resulting map, start over if necessary
+
+        # First, start at a land point and bfs to find all reachable points
+        reached = [[False for j in np.arange(self.size[1])] for i in np.arange(self.size[0])]
+        q = Queue()
+        q.put(land_points[0])
+        while not q.empty():
+            point = q.get()
+            tile = self.get_tile(point)
+            for coord in tile.get_neighbors_coords():
+                i, j = coord
+                if self.in_range(coord) and not reached[i][j]:
+                    neighbor = self.get_tile(coord)
+                    if neighbor.is_active():
+                        q.put(coord)
+                        reached[i][j] = True
+
+        # Start over if we find an active point which isn't reached
+        for i in range(self.size[0]):
+            for j in range(self.size[1]):
+                tile = self.get_tile((i, j))
+                if tile.is_active() and not reached[i][j]:
+                    self.make_map()
+                    return
 
     def get_tile(self, coord : Tuple[int, int]) -> Tile:
         row, col = coord
@@ -125,11 +145,13 @@ class Map:
             neighbor_coords = tile.get_neighbors_coords()
             for coord in neighbor_coords:
                 i, j = coord
-                if self.in_range(coord) and not reached[i][j] and tile.get_team() == team:
-                    reached[i][j] = True
-                    same_tiles.append(coord)
-                    q.put((priority+1, counter, self.get_tile(coord)))
-                    counter += 1
+                if self.in_range(coord) and not reached[i][j]:
+                    neighbor = self.get_tile(coord)
+                    if neighbor.get_team() == team and neighbor.is_active():
+                        reached[i][j] = True
+                        same_tiles.append(coord)
+                        q.put((priority+1, counter, self.get_tile(coord)))
+                        counter += 1
         return same_tiles
 
     def save_map(self):
