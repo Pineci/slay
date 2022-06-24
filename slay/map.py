@@ -81,6 +81,12 @@ class Map:
         row, col = coord
         return self.map_tiles[row][col]
 
+    def get_size(self) -> Tuple[int, int]:
+        return self.size
+
+    def get_tile_type(self) -> TileType:
+        return self.tile_type
+
     def __iter__(self):
         self.iter_i = 0
         self.iter_j = 0
@@ -88,14 +94,13 @@ class Map:
 
     def __next__(self):
         i, j = self.iter_i, self.iter_j
+        self.iter_i += 1
         if self.iter_i >= self.size[0]:
+            self.iter_j += 1
             if self.iter_j >= self.size[1]:
                 raise StopIteration
             else:
-                self.iter_j += 1
                 self.iter_i = 0
-        else:
-            self.iter_i += 1
         return self.get_tile((i, j))
 
     def __len__(self):
@@ -111,7 +116,7 @@ class Map:
 
         q = PriorityQueue()
         q.put((0, counter, self.get_tile(start_coord)))
-        reached[start_coord[i]][start_coord[j]] = True
+        reached[start_coord[0]][start_coord[1]] = True
         same_tiles = [start_coord]
         team = self.get_tile(start_coord).get_team()
             

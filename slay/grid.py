@@ -86,6 +86,7 @@ class HexGrid(Grid):
             # formula is (rows - 1) * sin(5*pi/3)*scale == height
             return height / ((rows - 1) * sin(5*pi/3))
 
+    @classmethod
     def bottom_right_from_scale(cls, top_left: Tuple[float, float],
                                      rows: int = 1,
                                      cols: int = 1,

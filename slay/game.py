@@ -14,6 +14,7 @@ class Game:
         self.map = map
         self.num_players = num_players
         self.initialize_map()
+        print(len(self.regions))
 
     def initialize_map(self):
         # Assign tiles to players randomly
@@ -32,4 +33,6 @@ class Game:
                     regions.append(new_region)
         self.regions = regions
 
+    def get_map(self) -> Map:
+        return self.map
     
