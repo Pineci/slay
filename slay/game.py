@@ -36,7 +36,7 @@ class Game:
                 covered = any(map(lambda r: r.contains_tile(tile.get_tile_coords()), regions))
                 if not covered:
                     continuous_tiles = self.map.bfs_find_same_team(tile.get_tile_coords())
-                    uuid = generate_id()
+                    uuid = generate_id(unique_ids)
                     unique_ids.append(uuid)
                     new_region = Region(map=self.map, tile_coords=continuous_tiles, id=uuid)
                     regions.append(new_region)
