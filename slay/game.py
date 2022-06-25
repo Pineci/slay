@@ -56,7 +56,7 @@ class Game:
     def place_piece(self, piece: Piece, original_region: Region, tile_coord: Tuple[int, int]) -> bool:
         other_region = self.get_region(tile_coord)
         if original_region == other_region:
-            pass
+            other_piece = other_region.get_piece(tile_coord)
         else:
             pass
 

@@ -38,6 +38,12 @@ class Region:
     def contains_tile(self, tile_coord: Tuple[int, int]) -> bool:
         return tile_coord in self.tile_coords
 
+    def get_piece(self, tile_coord: Tuple[int, int]) -> Piece:
+        for piece in self.pieces:
+            if piece.get_tile_coord() == tile_coord:
+                return piece
+        return None
+
     # TODO: Need to implement this, i.e. set balances etc.
     def initialize_region(self):
         if len(self.tile_coords) > 1:

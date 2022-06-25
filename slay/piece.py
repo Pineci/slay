@@ -9,8 +9,8 @@ class Piece(ABC):
     to overtake neighboring tiles.
     '''
 
-    def __init__(self, tile_coord : Tuple[int, int]=None):
-        self.tile_coord = tile_coord
+    def __init__(self):
+        pass
 
     @property
     @abstractclassmethod
