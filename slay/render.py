@@ -113,8 +113,8 @@ class Render:
             pygame.draw.polygon(self.display, tile_asset.get_team_color(team), shape, 0)
             pygame.draw.polygon(self.display, tile_asset.get_edge_color(), shape, edge_thickness)
 
-    def draw_piece(self, piece: Piece, texture_asset: TextureAsset) -> None:
-        tile = self.game.get_map().get_tile(piece.tile_coord)
+    def draw_piece(self, tile_coord: Tuple[int, int], piece: Piece, texture_asset: TextureAsset) -> None:
+        tile = self.game.get_map().get_tile(tile_coord)
         if tile.is_active():
             shape, center = tile.get_shape(self.grid)
             texture = texture_asset.get_piece_texture(piece)
@@ -123,8 +123,9 @@ class Render:
             self.display.blit(texture, top_left)
 
     def draw_region(self, region: Region, counter: int) -> None:
-        for piece in region.pieces:
-            self.draw_piece(piece, self.texture_asset)
+        for piece_coord in region.get_all_piece_coords():
+            piece = region.get_piece(piece_coord)
+            self.draw_piece(piece_coord, piece, self.texture_asset)
 
     def draw_game(self) -> None:
         counter = 0

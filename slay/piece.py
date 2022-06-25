@@ -9,6 +9,8 @@ class Piece(ABC):
     to overtake neighboring tiles.
     '''
 
+    MAX_SOLDIER_LEVEL = 4
+
     def __init__(self):
         pass
 
@@ -42,6 +44,11 @@ class Piece(ABC):
     def purchasable(self) -> bool:
         ...
 
+    @property
+    @abstractclassmethod
+    def upgradeable(self) -> bool:
+        ...
+
     #TODO: fill in other descriptors and rules as necessary, make this as general as possible
     #      so that other pieces can be made in the future
 
@@ -52,6 +59,7 @@ class Hut(Piece):
     turn_cost = 0
     initial_cost = 0
     purchasable = False
+    upgradeable = False
 
 class Fort(Piece):
     power = 2
@@ -60,6 +68,7 @@ class Fort(Piece):
     turn_cost = 0
     initial_cost = 15
     purchasable = True
+    upgradeable = False
 
 class Soldier1(Piece):
     power = 1
@@ -68,6 +77,7 @@ class Soldier1(Piece):
     turn_cost = 2
     initial_cost = 10
     purchasable = True
+    upgradeable = True
 
 class Soldier2(Piece):
     power = 2
@@ -76,3 +86,4 @@ class Soldier2(Piece):
     turn_cost = 6
     initial_cost = 20
     purchasable = True
+    upgradeable = True

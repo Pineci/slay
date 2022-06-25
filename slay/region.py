@@ -18,7 +18,7 @@ class Region:
     def __init__(self, map: Map=None, tile_coords: List[Tuple[int, int]] = [], initialize: bool=True, id: int=0):
         self.map = map
         self.tile_coords = tile_coords
-        self.pieces = []
+        self.pieces = {}
         self.id = id
         
         if initialize:
@@ -38,17 +38,31 @@ class Region:
     def contains_tile(self, tile_coord: Tuple[int, int]) -> bool:
         return tile_coord in self.tile_coords
 
+    def contains_piece(self, tile_coord: Tuple[int, int]) -> bool:
+        return tile_coord in self.pieces.keys()
+
     def get_piece(self, tile_coord: Tuple[int, int]) -> Piece:
-        for piece in self.pieces:
-            if piece.get_tile_coord() == tile_coord:
-                return piece
-        return None
+        if self.contains_piece(tile_coord):
+            return self.pieces[tile_coord]
+        else:
+            return None
+
+    def set_piece(self, tile_coord: Tuple[int, int], piece: Piece) -> None:
+        self.pieces[tile_coord] = piece
+
+    def remove_piece(self, tile_coord: Tuple[int, int]) -> None:
+        if self.contains_piece(tile_coord):
+            del self.pieces[tile_coord]
+
+
+    def get_all_piece_coords(self) -> List[Tuple[int, int]]: #TODO: Fix type signature, actually returns dict_keys
+        return self.pieces.keys()
 
     # TODO: Need to implement this, i.e. set balances etc.
     def initialize_region(self):
         if len(self.tile_coords) > 1:
             hut_coord = self.tile_coords[np.random.choice(range(len(self.tile_coords)))]
-            self.pieces.append(Hut(hut_coord))
+            self.set_piece(hut_coord, Hut())
 
         self.balance = len(self.tile_coords) * RegionConfig.tile_starting_balance
 
@@ -57,7 +71,7 @@ class Region:
         pass
 
     def check_valid_region(self) -> bool:
-        return self.check_tile_same_team() and self.check_tile_connectivity() and self.check_piece_containment()
+        return self.check_tile_same_team() and self.check_tile_connectivity()
 
     def check_tile_connectivity(self) -> bool:
         if len(self.tiles > 1):
@@ -84,6 +98,3 @@ class Region:
                 if self.tiles[idx].team != team:
                     return False
         return True
-
-    def check_piece_containment(self) -> bool:
-        ...

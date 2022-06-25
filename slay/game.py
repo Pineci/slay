@@ -53,10 +53,36 @@ class Game:
     #def set_agent(self, team: int, agent: Agent) -> None:
     #    self.agents[team] = agent
 
-    def place_piece(self, piece: Piece, original_region: Region, tile_coord: Tuple[int, int]) -> bool:
-        other_region = self.get_region(tile_coord)
+    # TODO: Finish this function
+    def check_valid_move(self, piece: Piece, original_region: Region, target_coord: Tuple[int, int]) -> bool:
+        other_region = self.get_region(target_coord)
         if original_region == other_region:
-            other_piece = other_region.get_piece(tile_coord)
+            if not other_region.contains_piece(target_coord):
+                return True
+            else:
+                other_piece = other_region.get_piece(target_coord)
+                if piece.upgradable and other_piece.upgradeable and piece.power + other_piece.power <= Piece.MAX_SOLDIER_LEVEL:
+                    return True # Can upgrade the piece
+                else:
+                    return False
         else:
-            pass
+            # Quick check: See if the other tile contains a more powerful piece
+            other_piece = other_region.get_piece(target_coord)
+            if other_piece and other_piece.power >= piece.power:
+                return False
+
+            # Now need to check to see if there is a surrounding piece which is more powerful
+            target_tile = self.get_map().get_tile(target_coord)
+            other_pieces = map(lambda coord: other_region.get_piece(coord), target_tile.get_neighbors_coords())
+            for other_piece in other_pieces:
+                if other_piece.power >= piece.power:
+                    return False
+            
+            return True
+
+    #def place_piece(self, piece: Piece, original_region: Region, target_coord: Tuple[int, int]) -> bool:
+
+
+    
+
 
