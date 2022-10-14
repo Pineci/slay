@@ -9,7 +9,7 @@ from render import Render
 if __name__ == '__main__':
     w, h = 720, 480
     hex_rows, hex_cols = 40, 20
-    map = Map(land_points=15, sea_points=10, size=(hex_rows, hex_cols))
+    map = Map(land_points=15, sea_points=15, size=(hex_rows, hex_cols))
     map.make_map()
     game = Game(map, num_players=3)
     renderer = Render((w, h), game)

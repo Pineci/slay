@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Generator
 from tile import Tile, TileType
 import numpy as np
 from queue import PriorityQueue, Queue
@@ -101,6 +101,13 @@ class Map:
         row, col = coord
         return self.map_tiles[row][col]
 
+    def set_tile(self, coord : Tuple[int, int], tile: Tile) -> None:
+        row, col = coord
+        self.map_tiles[row][col] = tile
+
+    def is_valid_tile_coords(self, tile_coords: Tuple[int, int]) -> bool:
+        return tile_coords[0] >= 0 and tile_coords[0] >= 0 and tile_coords[1] < self.size[0] and tile_coords[1] < self.size[1]
+
     def get_size(self) -> Tuple[int, int]:
         return self.size
 
@@ -127,8 +134,37 @@ class Map:
         return self.size[0] * self.size[1]
 
     def bfs_find_same_team(self, start_coord: Tuple[int, int]) -> List[Tuple[int, int]]:
+        #if not self.in_range(start_coord):
+        #    return []
+
+        ## Set up priority queue
+        #reached = [[False for j in np.arange(self.size[1])] for i in np.arange(self.size[0])]
+        #counter = 0
+
+        #q = PriorityQueue()
+        #q.put((0, counter, self.get_tile(start_coord)))
+        #reached[start_coord[0]][start_coord[1]] = True
+        #same_tiles = [start_coord]
+        #team = self.get_tile(start_coord).get_team()
+            
+        #while not q.empty():
+        #    priority, _, tile = q.get()
+        #    neighbor_coords = tile.get_neighbors_coords()
+        #    for coord in neighbor_coords:
+        #        i, j = coord
+        #        if self.in_range(coord) and not reached[i][j]:
+        #            neighbor = self.get_tile(coord)
+        #            if neighbor.get_team() == team and neighbor.is_active():
+        #                reached[i][j] = True
+        #                same_tiles.append(coord)
+        #                q.put((priority+1, counter, self.get_tile(coord)))
+        #                counter += 1
+        #return same_tiles
+        return list(self.bfs_same_team_generator(start_coord))
+
+    def bfs_same_team_generator(self, start_coord: Tuple[int, int]) -> Generator[Tuple[int, int], None, None]:
         if not self.in_range(start_coord):
-            return []
+            return
 
         # Set up priority queue
         reached = [[False for j in np.arange(self.size[1])] for i in np.arange(self.size[0])]
@@ -137,8 +173,8 @@ class Map:
         q = PriorityQueue()
         q.put((0, counter, self.get_tile(start_coord)))
         reached[start_coord[0]][start_coord[1]] = True
-        same_tiles = [start_coord]
         team = self.get_tile(start_coord).get_team()
+        yield start_coord
             
         while not q.empty():
             priority, _, tile = q.get()
@@ -149,10 +185,9 @@ class Map:
                     neighbor = self.get_tile(coord)
                     if neighbor.get_team() == team and neighbor.is_active():
                         reached[i][j] = True
-                        same_tiles.append(coord)
                         q.put((priority+1, counter, self.get_tile(coord)))
                         counter += 1
-        return same_tiles
+                        yield coord
 
     def save_map(self):
         pass

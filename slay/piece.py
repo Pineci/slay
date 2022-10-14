@@ -87,3 +87,12 @@ class Soldier2(Piece):
     initial_cost = 20
     purchasable = True
     upgradeable = True
+
+class PalmTree(Piece):
+    power = 0
+    name = "palmtree"
+    moveable = False
+    turn_cost = 1
+    initial_cost = 0
+    purchasable = False
+    upgradeable = False

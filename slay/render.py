@@ -1,6 +1,6 @@
 from typing import Tuple
 from tile import TileType, Tile
-from piece import Piece
+from piece import *
 from region import Region
 from grid import HexGrid, Grid
 from game import Game
@@ -83,6 +83,8 @@ class Render:
         self.tile_asset = TileAsset()
         self.texture_asset = TextureAsset()
 
+        self.selected_region_id = None
+
         self.initialize_pygame()
 
     def initialize_pygame(self) -> None:
@@ -122,20 +124,61 @@ class Render:
             top_left = (center[0] - texture_size[0]/2, center[1] - texture_size[1] * (0.5 + 0.25))
             self.display.blit(texture, top_left)
 
-    def draw_region(self, region: Region, counter: int) -> None:
+    def draw_region_border(self, region: Region) -> None:
+        if region.get_id() == self.selected_region_id:
+            map_ = self.game.get_map()
+            home = region.get_team()
+            for tile_coord in region.tile_coords:
+                tile = map_.get_tile(tile_coord)
+                for neighbor_coord in tile.get_neighbors_coords():
+                    if not map_.is_valid_tile_coords(neighbor_coord) or map_.get_tile(neighbor_coord).get_team() != home:
+                        edge = tile.get_edge_from_neighbor(neighbor_coord, self.grid)
+                        pygame.draw.line(self.display, (255, 255, 255), edge[0], edge[1], 2)
+
+    def draw_region_pieces(self, region: Region) -> None:
         for piece_coord in region.get_all_piece_coords():
             piece = region.get_piece(piece_coord)
             self.draw_piece(piece_coord, piece, self.texture_asset)
 
     def draw_game(self) -> None:
-        counter = 0
-        for region in self.game.regions:
-            self.draw_region(region, counter)
-            counter += 1
+        for region in self.game.regions.values():
+            self.draw_region_border(region)
+        for region in self.game.regions.values(): 
+            self.draw_region_pieces(region)
 
     def draw_map(self) -> None:
         for tile in self.game.get_map():
             self.draw_tile(tile, self.tile_asset, edge_thickness=2)
+
+    def find_closest_tile(self, pos: Tuple[int, int]) -> Tile:
+        map_ = self.game.get_map()
+        sqr_distances = {}
+        def get_tile_sqr_distance(tile: Tile):
+            tile_coords = tile.get_tile_coords()
+            if tile_coords not in sqr_distances.keys():
+                shape, center = tile.get_shape(self.grid)
+                sqr_distances[tile_coords] = (pos[0] - center[0]) ** 2 + (pos[1] - center[1]) ** 2
+            return sqr_distances[tile_coords]
+        
+        current_tile = map_.get_tile((map_.get_size()[0]//2, map_.get_size()[1]//2))
+        done = False
+        iter_ = 0
+        while not done:
+            iter_ += 1
+            neighbor_tiles = map(map_.get_tile, filter(map_.is_valid_tile_coords, current_tile.get_neighbors_coords()))
+            min_tile = None
+            for tile in neighbor_tiles:
+                if get_tile_sqr_distance(tile) < get_tile_sqr_distance(current_tile):
+                    if not min_tile or get_tile_sqr_distance(tile) < get_tile_sqr_distance(min_tile):
+                        min_tile = tile
+            if not min_tile:
+                done = True
+            else:
+                current_tile = min_tile
+        print(f"Used {iter_} iterations, calculated {len(sqr_distances.keys())} distances")
+        return current_tile
+        
+
 
     def event_handler(self):
         for event in pygame.event.get():
@@ -144,7 +187,27 @@ class Render:
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                print(pos)
+                button1, button2, button3, button4, button5 = pygame.mouse.get_pressed(num_buttons=5)
+                if button1:
+                    row1 = self.grid.grid[0][0:5]
+                    row2 = self.grid.grid[1][0:5]
+                    row3 = self.grid.grid[2][0:5]
+
+                    rows = row1 + row2 + row3
+                    #print(list(map(lambda x: float(f"{(x[0]-72)*20:.2f}"), rows)))
+                    #print(list(map(lambda x: float(f"{(x[1]-72)*20:.2f}"), rows)))
+                    selected_tile = self.find_closest_tile(pos).get_tile_coords()
+                    print(f"SELECTED TILE COORDS {selected_tile}")
+                    selected_region = self.game.get_region(selected_tile)
+                    if selected_region:
+                        self.selected_region_id = selected_region.get_id()
+                elif button3:
+                    selected_tile = self.find_closest_tile(pos)
+                    selected_region = self.game.get_region_by_id(self.selected_region_id)
+                    if any(map(selected_region.contains_tile, selected_tile.get_neighbors_coords())):
+                        piece = Soldier2()
+                        if self.game.check_valid_move(piece, selected_region, selected_tile.get_tile_coords()):
+                            self.selected_region_id = self.game.place_piece(piece, selected_region, selected_tile.get_tile_coords())
             elif event.type == pygame.VIDEORESIZE:
                 self.screen_size = event.dict['size']
                 self.grid = self.make_grid()
